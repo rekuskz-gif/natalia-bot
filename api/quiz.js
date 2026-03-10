@@ -14,18 +14,18 @@ export default async function handler(req, res) {
     await fetch(`${KV_URL}/set/quiz_${id}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ ex: 3600, value: JSON.stringify(data) })
+      body: JSON.stringify({ ex: 86400, value: JSON.stringify(data) })
     });
 
     const keys = { clients:"Как находят",budget:"Бюджет",result:"Срок",check:"Средний чек",leads:"Заявок",audience:"Аудитория",geo:"География",tasks:"Задачи",competitors:"Конкуренты",advantage:"Преимущество",services:"Услуги" };
     let text = "📋 Новая заявка с квиза:\n\n";
     for (const k in keys) { if (data[k]) text += `• ${keys[k]}: ${data[k]}\n`; }
-    text += `\n🔗 Ссылка: https://natalia-bot.vercel.app?id=${id}`;
+    text += `\n🔗 Бот: https://seokazmarket.ru/bot?id=${id}`;
 
     await fetch(`https://api.telegram.org/bot8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: "376719975", text })
+      body: JSON.stringify({ chat_id: "376719575", text })
     });
 
     return res.status(200).json({ ok: true, id });
