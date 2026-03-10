@@ -1,25 +1,37 @@
-let lastQuiz = null
+let quizzes = {};
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
 
-if (req.method === "POST") {
+  // Tilda отправляет webhook
+  if (req.method === "POST") {
 
-lastQuiz = req.body
+    const id = Date.now().toString();
 
-console.log("Новый квиз:", lastQuiz)
+    quizzes[id] = req.body;
 
-return res.status(200).json({ ok: true })
+    console.log("Новый квиз:", id, req.body);
 
-}
+    return res.status(200).json({
+      ok: true,
+      id: id
+    });
 
-if (req.method === "GET") {
+  }
 
-return res.status(200).json({
-quiz: lastQuiz
-})
+  // бот получает данные по ID
+  if (req.method === "GET") {
 
-}
+    const id = req.query.id;
 
-res.status(405).end()
+    if (!id || !quizzes[id]) {
+      return res.status(404).json({error:"quiz not found"});
+    }
 
+    return res.status(200).json({
+      quiz: quizzes[id]
+    });
+
+  }
+
+  res.status(405).end();
 }
