@@ -32,26 +32,19 @@ button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
 <body>
 <div class="chat">
   <div class="header">
-    <div class="avatar">
-      <img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'">
-    </div>
-    <div>
-      <div class="name">Наталия</div>
-      <div class="status">● онлайн</div>
-    </div>
+    <div class="avatar"><img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'"></div>
+    <div><div class="name">Наталия</div><div class="status">● онлайн</div></div>
   </div>
   <div id="messages" class="messages"></div>
   <div class="input">
-    <textarea id="input" rows="1" placeholder="Напишите сообщение... (Enter для отправки)"></textarea>
+    <textarea id="input" rows="1" placeholder="Напишите сообщение..."></textarea>
     <button id="btn" onclick="send()">↑</button>
   </div>
 </div>
-
 <script>
 const TG_TOKEN="8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
 const TG_CHAT="376719975";
 const SYS="Тебя зовут Наталия. Ты эксперт по интернет-рекламе, SEO и продвижению бизнеса. Ты работаешь в компании seokazmarket.kz. Отвечай на русском языке. Давай конкретные персональные рекомендации. Будь профессиональной но дружелюбной. В конце всегда предлагай записаться на консультацию.";
-
 let history=[],loading=false;
 
 function add(role,text){
@@ -72,52 +65,24 @@ function showTyping(){
   m.scrollTop=m.scrollHeight;
 }
 
-function hideTyping(){
-  const t=document.getElementById("typing");
-  if(t)t.remove();
-}
+function hideTyping(){const t=document.getElementById("typing");if(t)t.remove();}
 
 async function sendTG(text){
-  try{
-    await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({chat_id:TG_CHAT,text})
-    });
-  }catch(e){}
+  try{await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text})});}catch(e){}
 }
 
-function getQuiz(){
-  const p=new URLSearchParams(window.location.search);
-  const keys={budget:"Бюджет",clients:"Как находят",result:"Срок",check:"Средний чек",leads:"Заявок",audience:"Аудитория",geo:"География",tasks:"Задачи",competitors:"Конкуренты",advantage:"Преимущество",services:"Услуги"};
-  let s="";
-  for(const k in keys){const v=p.get(k);if(v)s+=`• ${keys[k]}: ${decodeURIComponent(v)}\n`;}
-  return s;
-}
-
-async function ask(msg){
+async function ask(msg,sys){
   history.push({role:"user",content:msg});
   showTyping();
   try{
-    const r=await fetch("/api/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"openai/gpt-4o-mini",
-        max_tokens:1500,
-        messages:[{role:"system",content:SYS},...history]
-      })
-    });
+    const r=await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"openai/gpt-4o-mini",max_tokens:1500,messages:[{role:"system",content:sys||SYS},...history]})});
     const data=await r.json();
     const reply=data.choices?.[0]?.message?.content||"Что-то пошло не так...";
     history.push({role:"assistant",content:reply});
     hideTyping();
     add("bot",reply);
-    sendTG(`💬 Диалог:\n\n👤 ${msg}\n\n🤖 ${reply}`);
-  }catch(e){
-    hideTyping();
-    add("bot","Ошибка соединения 😔");
-  }
+    sendTG(`💬 ${msg}\n\n🤖 ${reply}`);
+  }catch(e){hideTyping();add("bot","Ошибка соединения 😔");}
   loading=false;
   document.getElementById("btn").disabled=false;
 }
@@ -137,14 +102,32 @@ document.getElementById("input").addEventListener("keydown",e=>{
   if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();}
 });
 
-const quiz=getQuiz();
-if(quiz){
-  sendTG("📋 Новая заявка с квиза:\n\n"+quiz);
-  add("bot","Привет! Меня зовут Наталия 👋\n\nПолучила ваши ответы из квиза. Анализирую...");
-  ask("Проанализируй ответы клиента и предложи стратегию: "+quiz);
-}else{
-  add("bot","Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+async function init(){
+  const p=new URLSearchParams(window.location.search);
+  const id=p.get("id");
+  if(id){
+    add("bot","Привет! Меня зовут Наталия 👋\n\nЗагружаю ваши данные...");
+    showTyping();
+    try{
+      const r=await fetch(`/api/quiz?id=${id}`);
+      const data=await r.json();
+      hideTyping();
+      if(data.quiz){
+        const keys={clients:"Как находят",budget:"Бюджет",result:"Срок",check:"Средний чек",leads:"Заявок",audience:"Аудитория",geo:"География",tasks:"Задачи",competitors:"Конкуренты",advantage:"Преимущество",services:"Услуги"};
+        let quizText="";
+        for(const k in keys){if(data.quiz[k])quizText+=`• ${keys[k]}: ${data.quiz[k]}\n`;}
+        const sys=SYS+"\n\nДАННЫЕ КЛИЕНТА С КВИЗА:\n"+quizText;
+        await ask("Проанализируй мои ответы и предложи стратегию продвижения.",sys);
+      }else{
+        add("bot","Не нашла ваши данные. Задайте вопрос — помогу!");
+      }
+    }catch(e){hideTyping();add("bot","Привет! Я Наталия 👋 Чем могу помочь?");}
+  }else{
+    add("bot","Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+  }
 }
+
+init();
 </script>
 </body>
 </html>
