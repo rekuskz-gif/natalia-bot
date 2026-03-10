@@ -1,28 +1,26 @@
+let quizData = null;
+
 export default async function handler(req, res) {
 
-if (req.method !== "POST") {
-return res.status(405).json({error:"Method not allowed"})
-}
+  // Tilda отправляет ответы
+  if (req.method === "POST") {
 
-const data = req.body
+    quizData = req.body;
 
-try {
+    console.log("Новый квиз:", quizData);
 
-await fetch("https://api.telegram.org/bot8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc/sendMessage",{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-chat_id:"376719975",
-text:"Новый квиз:\n"+JSON.stringify(data,null,2)
-})
-})
+    return res.status(200).json({ ok: true });
 
-} catch(e) {
-console.log(e)
-}
+  }
 
-res.status(200).json({ok:true})
+  // бот запрашивает ответы
+  if (req.method === "GET") {
 
+    return res.status(200).json({
+      quiz: quizData
+    });
+
+  }
+
+  res.status(405).json({ error: "Method not allowed" });
 }
