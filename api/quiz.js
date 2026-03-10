@@ -11,14 +11,12 @@ export default async function handler(req, res) {
     const data = req.body;
     const id = (data.tranid || Date.now().toString()).replace(/[^a-zA-Z0-9_]/g, "_");
 
-    // Сохраняем по уникальному id
     await fetch(`${KV_URL}/set/quiz_${id}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify({ ex: 86400, value: JSON.stringify(data) })
     });
 
-    // Сохраняем как последнюю заявку
     await fetch(`${KV_URL}/set/quiz_latest`, {
       method: "POST",
       headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
@@ -49,7 +47,16 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${KV_TOKEN}` }
     });
     const json = await r.json();
-    const quiz = json.result ? JSON.parse(json.result) : null;
+
+    let quiz = null;
+    if (json.result) {
+      try {
+        quiz = JSON.parse(json.result);
+      } catch(e) {
+        quiz = json.result;
+      }
+    }
+
     return res.status(200).json({ quiz });
   }
 
