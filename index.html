@@ -2,40 +2,42 @@ async function loadQuiz(){
 
 try{
 
-const r=await fetch("/api/quiz");
-const data=await r.json();
+const r = await fetch("/api/quiz");
+const data = await r.json();
 
 if(data.quiz){
 
-const q=data.quiz;
+const q = data.quiz;
 
-const s=`
-• Как находят: ${q.clients || ""}
-• Средний чек: ${q.check || ""}
-• География: ${q.geo || ""}
+const text = `
+Я получила ваши ответы из квиза:
+
+Источник клиентов: ${q.clients}
+Средний чек: ${q.check}
+Источник рекламы: ${q.utm_source}
 `;
 
-quiz=s;
-
-tg("📋 Новая заявка с квиза:\n\n"+s);
-
-addMsg("assistant","Привет! Меня зовут Наталия 👋\n\nПолучила ваши ответы из квиза. Анализирую...");
+addMsg("assistant",text);
 
 showTyping();
 
-setTimeout(()=>ask(SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+s,"Проанализируй ответы клиента и предложи стратегию продвижения."),800);
+setTimeout(()=>{
+ask(
+SYS + "\n\nДАННЫЕ КЛИЕНТА:\n" + text,
+"Проанализируй ответы клиента и предложи стратегию продвижения."
+);
+},800);
 
 }else{
 
-addMsg("assistant","Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+addMsg("assistant","Привет! Я Наталия — SEO эксперт. Чем могу помочь?");
 
 }
 
 }catch(e){
 
 console.log(e);
-
-addMsg("assistant","Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO. Чем могу помочь?");
+addMsg("assistant","Привет! Я Наталия — SEO эксперт. Чем могу помочь?");
 
 }
 
