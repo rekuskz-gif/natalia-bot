@@ -46,16 +46,13 @@ export default async function handler(req, res) {
     const r = await fetch(`${KV_URL}/get/quiz_${safeId}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` }
     });
-    const json = await r.json();
+    const raw = await r.text();
 
     let quiz = null;
-    if (json.result) {
-      try {
-        quiz = JSON.parse(json.result);
-      } catch(e) {
-        quiz = json.result;
-      }
-    }
+    try {
+      const match = raw.match(/\{.*\}/s);
+      if (match) quiz = JSON.parse(match[0]);
+    } catch(e) {}
 
     return res.status(200).json({ quiz });
   }
