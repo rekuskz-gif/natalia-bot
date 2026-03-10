@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     await fetch(`https://api.telegram.org/bot8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: "376719575", text })
+      body: JSON.stringify({ chat_id: "376719975", text })
     });
 
     return res.status(200).json({ ok: true, id });
