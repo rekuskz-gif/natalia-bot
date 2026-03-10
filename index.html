@@ -1,46 +1,344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Наталия — SEO эксперт</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+font-family:Georgia,serif;
+background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:20px
+}
+
+.chat-wrapper{
+width:100%;
+max-width:680px;
+background:rgba(255,255,255,0.05);
+backdrop-filter:blur(20px);
+border-radius:22px;
+border:1px solid rgba(255,255,255,0.1);
+box-shadow:0 30px 80px rgba(0,0,0,0.6);
+display:flex;
+flex-direction:column;
+height:85vh;
+overflow:hidden
+}
+
+.chat-header{
+padding:20px 26px;
+border-bottom:1px solid rgba(255,255,255,0.08);
+display:flex;
+align-items:center;
+gap:12px
+}
+
+.chat-avatar{
+width:46px;
+height:46px;
+border-radius:50%;
+overflow:hidden;
+border:2px solid #a78bfa
+}
+
+.chat-avatar img{
+width:100%;
+height:100%;
+object-fit:cover
+}
+
+.chat-title{
+color:#fff;
+font-weight:bold
+}
+
+.chat-status{
+color:#a78bfa;
+font-size:12px
+}
+
+.chat-messages{
+flex:1;
+overflow-y:auto;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:16px
+}
+
+.message{display:flex}
+
+.message.user{justify-content:flex-end}
+
+.message.assistant{justify-content:flex-start}
+
+.bubble{
+max-width:75%;
+padding:12px 16px;
+font-size:15px;
+line-height:1.6;
+color:#fff;
+white-space:pre-wrap
+}
+
+.message.user .bubble{
+background:linear-gradient(135deg,#7c3aed,#4f46e5);
+border-radius:18px 18px 4px 18px
+}
+
+.message.assistant .bubble{
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.1);
+border-radius:18px 18px 18px 4px
+}
+
+.chat-input-area{
+padding:16px;
+border-top:1px solid rgba(255,255,255,0.08);
+display:flex;
+gap:10px
+}
+
+textarea{
+flex:1;
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.12);
+border-radius:12px;
+padding:10px 14px;
+color:#fff;
+font-size:15px;
+resize:none;
+outline:none
+}
+
+textarea::placeholder{color:rgba(255,255,255,0.4)}
+
+.send-btn{
+width:46px;
+height:46px;
+border-radius:50%;
+background:linear-gradient(135deg,#7c3aed,#4f46e5);
+border:none;
+color:#fff;
+font-size:18px;
+cursor:pointer
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-wrapper">
+
+<div class="chat-header">
+<div class="chat-avatar">
+<img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg">
+</div>
+
+<div>
+<div class="chat-title">Наталия</div>
+<div class="chat-status">● онлайн</div>
+</div>
+</div>
+
+<div class="chat-messages" id="messages"></div>
+
+<div class="chat-input-area">
+<textarea id="input" placeholder="Напишите сообщение..."></textarea>
+<button class="send-btn" onclick="sendMessage()">➤</button>
+</div>
+
+</div>
+
+<script>
+
+const TG_TOKEN="8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc"
+const TG_CHAT="376719975"
+
+const SYS=`
+Ты Наталия — SEO эксперт компании seokazmarket.kz.
+Ты анализируешь бизнес клиента и предлагаешь стратегию продвижения.
+
+Говори профессионально но дружелюбно.
+Давай конкретные рекомендации.
+В конце всегда предлагай консультацию.
+`
+
+let history=[]
+let quiz=null
+let loading=false
+
+
+function addMsg(role,text){
+
+const m=document.getElementById("messages")
+
+const d=document.createElement("div")
+d.className="message "+role
+
+const b=document.createElement("div")
+b.className="bubble"
+b.textContent=text
+
+d.appendChild(b)
+m.appendChild(d)
+
+m.scrollTop=m.scrollHeight
+
+}
+
+
+async function tg(text){
+
+try{
+
+await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+chat_id:TG_CHAT,
+text:text
+})
+
+})
+
+}catch(e){}
+
+}
+
+
+
+async function ask(sys,msg){
+
+history.push({
+role:"user",
+content:msg
+})
+
+const r=await fetch("/api/chat",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify({
+
+model:"openai/gpt-4o-mini",
+
+messages:[
+{role:"system",content:sys},
+...history
+]
+
+})
+
+})
+
+const data=await r.json()
+
+const reply=data.choices?.[0]?.message?.content || "Ошибка..."
+
+history.push({
+role:"assistant",
+content:reply
+})
+
+addMsg("assistant",reply)
+
+tg("Диалог:\n\n"+msg+"\n\n"+reply)
+
+}
+
+
+
+async function sendMessage(){
+
+if(loading)return
+
+const input=document.getElementById("input")
+
+const text=input.value.trim()
+
+if(!text)return
+
+loading=true
+
+input.value=""
+
+addMsg("user",text)
+
+await ask(
+quiz ? SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+quiz : SYS,
+text
+)
+
+loading=false
+
+}
+
+
+
 async function loadQuiz(){
 
 try{
 
-const r = await fetch("/api/quiz");
-const data = await r.json();
+const r=await fetch("/api/quiz")
+
+const data=await r.json()
 
 if(data.quiz){
 
-const q = data.quiz;
+const q=data.quiz
 
-const text = `
+const text=`
 Я получила ваши ответы из квиза:
 
 Источник клиентов: ${q.clients}
 Средний чек: ${q.check}
-Источник рекламы: ${q.utm_source}
-`;
+Источник трафика: ${q.utm_source}
+`
 
-addMsg("assistant",text);
+quiz=text
 
-showTyping();
+addMsg("assistant",text)
 
 setTimeout(()=>{
+
 ask(
-SYS + "\n\nДАННЫЕ КЛИЕНТА:\n" + text,
+SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+text,
 "Проанализируй ответы клиента и предложи стратегию продвижения."
-);
-},800);
+)
 
-}else{
+},800)
 
-addMsg("assistant","Привет! Я Наталия — SEO эксперт. Чем могу помочь?");
-
-}
-
-}catch(e){
-
-console.log(e);
-addMsg("assistant","Привет! Я Наталия — SEO эксперт. Чем могу помочь?");
+return
 
 }
 
+}catch(e){}
+
+addMsg("assistant","Привет! Я Наталия — SEO эксперт. Чем могу помочь?")
+
 }
 
-loadQuiz();
+
+loadQuiz()
+
+</script>
+
+</body>
+</html>
