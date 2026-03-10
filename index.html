@@ -39,7 +39,7 @@ body{font-family:'Georgia',serif;background:linear-gradient(135deg,#0f0c29,#302b
 <div class="chat-wrapper">
   <div class="chat-header">
     <div class="chat-avatar">
-      <img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия">
+      <img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'">
     </div>
     <div>
       <div class="chat-title">Наталия</div>
@@ -54,7 +54,6 @@ body{font-family:'Georgia',serif;background:linear-gradient(135deg,#0f0c29,#302b
 </div>
 
 <script>
-const API_KEY="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";
 const TG_TOKEN="8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
 const TG_CHAT="376719975";
 const SYS="Тебя зовут Наталия. Ты эксперт по интернет-рекламе, SEO и продвижению бизнеса. Ты работаешь в компании seokazmarket.kz. Отвечай на русском языке. Давай конкретные персональные рекомендации. Будь профессиональной но дружелюбной. В конце всегда предлагай записаться на консультацию.";
@@ -93,16 +92,11 @@ async function tg(text){
 async function ask(sys,msg){
   history.push({role:"user",content:msg});
   try{
-    const r=await fetch("https://openrouter.ai/api/v1/chat/completions",{
+    const r=await fetch("/api/chat",{
       method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":"Bearer "+API_KEY,
-        "HTTP-Referer":"https://seokazmarket.ru",
-        "X-Title":"Наталия"
-      },
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        model:"anthropic/claude-sonnet-4-5",
+        model:"openai/gpt-4o-mini",
         max_tokens:1500,
         messages:[{role:"system",content:sys},...history]
       })
@@ -112,7 +106,7 @@ async function ask(sys,msg){
     history.push({role:"assistant",content:reply});
     hideTyping();addMsg("assistant",reply);
     tg(`💬 Диалог:\n\n👤 ${msg}\n\n🤖 ${reply}`);
-  }catch(e){hideTyping();addMsg("assistant","Ошибка соединения 😔");}
+  }catch(e){hideTyping();addMsg("assistant","Ошибка соединения 😔");console.error(e);}
   loading=false;
   document.getElementById("sendBtn").disabled=false;
   document.getElementById("input").focus();
