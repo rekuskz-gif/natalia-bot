@@ -1,26 +1,25 @@
-let quizData = null;
+let lastQuiz = null
 
 export default async function handler(req, res) {
 
-  // Tilda отправляет ответы
-  if (req.method === "POST") {
+if (req.method === "POST") {
 
-    quizData = req.body;
+lastQuiz = req.body
 
-    console.log("Новый квиз:", quizData);
+console.log("Новый квиз:", lastQuiz)
 
-    return res.status(200).json({ ok: true });
+return res.status(200).json({ ok: true })
 
-  }
+}
 
-  // бот запрашивает ответы
-  if (req.method === "GET") {
+if (req.method === "GET") {
 
-    return res.status(200).json({
-      quiz: quizData
-    });
+return res.status(200).json({
+quiz: lastQuiz
+})
 
-  }
+}
 
-  res.status(405).json({ error: "Method not allowed" });
+res.status(405).end()
+
 }
