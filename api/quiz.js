@@ -11,10 +11,18 @@ export default async function handler(req, res) {
     const data = req.body;
     const id = (data.tranid || Date.now().toString()).replace(/[^a-zA-Z0-9_]/g, "_");
 
+    // Сохраняем по уникальному id
     await fetch(`${KV_URL}/set/quiz_${id}`, {
       method: "POST",
       headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
       body: JSON.stringify({ ex: 86400, value: JSON.stringify(data) })
+    });
+
+    // Сохраняем как последнюю заявку
+    await fetch(`${KV_URL}/set/quiz_latest`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${KV_TOKEN}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ ex: 3600, value: JSON.stringify(data) })
     });
 
     const keys = { clients:"Как находят",budget:"Бюджет",result:"Срок",check:"Средний чек",leads:"Заявок",audience:"Аудитория",geo:"География",tasks:"Задачи",competitors:"Конкуренты",advantage:"Преимущество",services:"Услуги" };
@@ -35,7 +43,7 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "no id" });
 
-    const safeId = id.replace(/[^a-zA-Z0-9_]/g, "_");
+    const safeId = id === "latest" ? "latest" : id.replace(/[^a-zA-Z0-9_]/g, "_");
 
     const r = await fetch(`${KV_URL}/get/quiz_${safeId}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` }
