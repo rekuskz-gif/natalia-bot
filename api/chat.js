@@ -14,7 +14,7 @@ export default async function handler(req, res) {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "Content-Type": "application/json",
         "HTTP-Referer": "https://natalia-bot.vercel.app",
-        "X-Title": "Наталия"
+        "X-Title": "Natalia Bot"
       },
       body: JSON.stringify(req.body)
     });
