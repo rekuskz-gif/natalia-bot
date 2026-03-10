@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,68 +7,99 @@
 <title>Наталия — SEO эксперт</title>
 
 <style>
+*{box-sizing:border-box;margin:0;padding:0}
+
 body{
-font-family:Arial;
-background:#111;
-color:#fff;
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+height:100vh;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-margin:0
+color:white;
 }
 
 .chat{
-width:600px;
-background:#1e1e1e;
-border-radius:10px;
+width:680px;
+max-width:95%;
+height:85vh;
+background:rgba(255,255,255,0.05);
+border-radius:18px;
 display:flex;
 flex-direction:column;
-height:80vh
+overflow:hidden;
+backdrop-filter:blur(15px);
+}
+
+.header{
+padding:18px;
+border-bottom:1px solid rgba(255,255,255,0.1);
+display:flex;
+gap:12px;
+align-items:center;
+}
+
+.avatar{
+width:42px;
+height:42px;
+border-radius:50%;
+background:#7c3aed;
+}
+
+.title{
+font-weight:bold;
 }
 
 .messages{
 flex:1;
 padding:20px;
-overflow-y:auto
+overflow-y:auto;
+display:flex;
+flex-direction:column;
+gap:14px;
 }
 
 .msg{
-margin-bottom:12px;
-padding:10px 14px;
-border-radius:8px;
-max-width:80%
-}
-
-.user{
-background:#4f46e5;
-align-self:flex-end
+max-width:75%;
+padding:12px 16px;
+border-radius:14px;
+line-height:1.5;
+white-space:pre-wrap;
 }
 
 .bot{
-background:#333
+background:rgba(255,255,255,0.08);
+border:1px solid rgba(255,255,255,0.1);
+}
+
+.user{
+align-self:flex-end;
+background:#7c3aed;
 }
 
 .input{
+border-top:1px solid rgba(255,255,255,0.1);
 display:flex;
-border-top:1px solid #333
 }
 
-input{
+textarea{
 flex:1;
-padding:14px;
+background:transparent;
 border:none;
-background:#222;
-color:#fff
+color:white;
+padding:16px;
+resize:none;
+outline:none;
 }
 
 button{
-width:100px;
-background:#4f46e5;
+width:90px;
+background:#7c3aed;
 border:none;
-color:#fff;
-cursor:pointer
+color:white;
+cursor:pointer;
 }
+
 </style>
 </head>
 
@@ -75,10 +107,18 @@ cursor:pointer
 
 <div class="chat">
 
-<div class="messages" id="messages"></div>
+<div class="header">
+<div class="avatar"></div>
+<div>
+<div class="title">Наталия</div>
+<div style="font-size:12px;color:#a78bfa">SEO эксперт</div>
+</div>
+</div>
+
+<div id="messages" class="messages"></div>
 
 <div class="input">
-<input id="input" placeholder="Напишите сообщение">
+<textarea id="input" placeholder="Напишите сообщение..."></textarea>
 <button onclick="send()">Отправить</button>
 </div>
 
@@ -86,19 +126,20 @@ cursor:pointer
 
 <script>
 
-const SYS="Ты Наталия — SEO эксперт. Помогаешь бизнесу продвигаться."
+const TG_TOKEN="ВАШ_ТОКЕН"
+const TG_CHAT="ВАШ_CHAT_ID"
+
+const SYS="Ты Наталия — SEO эксперт. Дай рекомендации по продвижению бизнеса."
 
 let history=[]
-let quiz=null
+let quizText=""
 
 function msg(role,text){
 
 const m=document.getElementById("messages")
 
 const d=document.createElement("div")
-
 d.className="msg "+(role==="user"?"user":"bot")
-
 d.textContent=text
 
 m.appendChild(d)
@@ -107,29 +148,37 @@ m.scrollTop=m.scrollHeight
 
 }
 
+async function tg(text){
+
+try{
+
+await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+chat_id:TG_CHAT,
+text:text
+})
+})
+
+}catch(e){}
+
+}
+
 async function ask(text){
 
 history.push({role:"user",content:text})
 
 const r=await fetch("/api/chat",{
-
 method:"POST",
-
-headers:{
-"Content-Type":"application/json"
-},
-
+headers:{"Content-Type":"application/json"},
 body:JSON.stringify({
-
 model:"openai/gpt-4o-mini",
-
 messages:[
-{role:"system",content:SYS},
+{role:"system",content:SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+quizText},
 ...history
 ]
-
 })
-
 })
 
 const data=await r.json()
@@ -139,6 +188,8 @@ const reply=data.choices?.[0]?.message?.content || "Ошибка"
 history.push({role:"assistant",content:reply})
 
 msg("bot",reply)
+
+tg("Диалог:\n\n"+text+"\n\n"+reply)
 
 }
 
@@ -160,34 +211,40 @@ await ask(text)
 
 async function loadQuiz(){
 
-try{
+const params=new URLSearchParams(window.location.search)
+const id=params.get("id")
 
-const r=await fetch("/api/quiz")
+if(!id){
 
-const data=await r.json()
-
-if(data.quiz){
-
-const q=data.quiz
-
-quiz=`
-Клиенты приходят: ${q.clients}
-Средний чек: ${q.check}
-`
-
-msg("bot","Получила ваши ответы из квиза 👋")
-
-msg("bot",quiz)
-
-await ask("Проанализируй ответы клиента и предложи стратегию продвижения")
+msg("bot","Привет! Я Наталия 👋\nЧем могу помочь вашему бизнесу?")
 
 return
 
 }
 
-}catch(e){}
+try{
 
-msg("bot","Привет! Я Наталия — SEO эксперт. Чем могу помочь?")
+const r=await fetch("/api/quiz?id="+id)
+const data=await r.json()
+
+const q=data.quiz
+
+quizText=`
+Источник клиентов: ${q.clients}
+Средний чек: ${q.check}
+`
+
+msg("bot","Спасибо за ответы в квизе 👋")
+
+msg("bot",quizText)
+
+await ask("Сделай анализ бизнеса и предложи стратегию продвижения")
+
+}catch(e){
+
+msg("bot","Привет! Я Наталия 👋\nЧем могу помочь?")
+
+}
 
 }
 
@@ -197,3 +254,4 @@ loadQuiz()
 
 </body>
 </html>
+```
