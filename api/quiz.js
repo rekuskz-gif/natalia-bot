@@ -9,7 +9,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     const data = req.body;
-    const id = data.tranid || Date.now().toString();
+    const id = (data.tranid || Date.now().toString()).replace(/[^a-zA-Z0-9_]/g, "_");
 
     await fetch(`${KV_URL}/set/quiz_${id}`, {
       method: "POST",
@@ -35,7 +35,9 @@ export default async function handler(req, res) {
     const { id } = req.query;
     if (!id) return res.status(400).json({ error: "no id" });
 
-    const r = await fetch(`${KV_URL}/get/quiz_${id}`, {
+    const safeId = id.replace(/[^a-zA-Z0-9_]/g, "_");
+
+    const r = await fetch(`${KV_URL}/get/quiz_${safeId}`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` }
     });
     const json = await r.json();
