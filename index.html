@@ -1,9 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Наталия</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Georgia,serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
@@ -28,8 +22,7 @@ textarea::placeholder{color:rgba(255,255,255,0.3)}
 button{width:46px;height:46px;border:none;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;cursor:pointer;font-size:20px;flex-shrink:0}
 button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
 </style>
-</head>
-<body>
+
 <div class="chat">
   <div class="header">
     <div class="avatar"><img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'"></div>
@@ -41,11 +34,10 @@ button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
     <button id="btn" onclick="send()">↑</button>
   </div>
 </div>
+
 <script>
 const TG_TOKEN = "8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
 const TG_CHAT = "376719975";
-
-const SYS = "Ты — Наталия, эксперт по лидогенерации для производителей детских площадок. 10 лет опыта. Живая, теплая, уверенная. Никогда не говори что ты ИИ. Пиши коротко — максимум 5-6 строк за раз. Отвечай только на русском языке.\n\nКОМПЛИМЕНТЫ — используй в диалоге:\n- [name], вы дошли до конца — это говорит о серьезности\n- Отличный регион! Рынок там растет, конкуренция низкая\n- Такой чек — серьезный бизнес, квиз окупается с первой заявки\n- Амбициозная цель! Такие предприниматели добиваются результата\n- Хорошо что признаете проблему — половина отрицают\n- Отличный вопрос! Именно так мыслят успешные предприниматели\n- То что пробовали — это опыт. Теперь сделаем правильно\n- Вы быстро соображаете — с такими приятно работать\n\nПЕРВОЕ СООБЩЕНИЕ — строго по структуре:\n1. Обратись по имени + комплимент за квиз\n2. ВАУ-РАСЧЕТ: Сейчас [leads] заявок x [check] = XXX р/мес. Хотите [result] x [check] = XXX р/мес. Теряете XXX р каждый месяц\n3. Боль [tasks]: Мало заявок — квиз-воронка за 7 дней. Дорогие — квиз отсеивает нецелевых. Плохо закрываем — дам скрипт. Регионы — покажу как зайти\n4. План: 1. Квиз под [clients] 7 дней 2. РСЯ в [geo] от 150р 3. Результат через 30 дней\n5. Один вопрос для диалога\n\nПРАВИЛА:\n- Всегда по имени\n- Каждые 2-3 сообщения комплимент\n- Один вопрос за раз\n- Цифры и конкретика\n- Веди к созвону на 15 минут\n- Не проси данных — работай с тем что есть\n\nЗАПРЕЩЕНО: длинные тексты, общие фразы, я не знаю, называть конкурентов";
 
 let history = [], loading = false, clientName = "";
 
@@ -82,7 +74,7 @@ async function sendTG(text) {
   } catch(e) {}
 }
 
-async function ask(msg, sys) {
+async function ask(msg) {
   history.push({role: "user", content: msg});
   showTyping();
   try {
@@ -92,7 +84,7 @@ async function ask(msg, sys) {
       body: JSON.stringify({
         model: "openai/gpt-4o-mini",
         max_tokens: 1500,
-        messages: [{role: "system", content: sys || SYS}, ...history]
+        messages: [...history]
       })
     });
     const data = await r.json();
@@ -155,7 +147,7 @@ async function init() {
           "Телефон: " + (q.phone || "не указано") + "\n" +
           "Потери в месяц: " + losses.toLocaleString("ru") + " р\n\n" +
           "Обратись по имени. Сделай ВАУ-расчет потерь. Попади в боль. Дай конкретный план. Не проси данных.";
-        await ask(userMsg, SYS);
+        await ask(userMsg);
       } else {
         add("bot", "Привет! Я Наталия.\n\nЧем могу помочь?");
       }
@@ -170,5 +162,3 @@ async function init() {
 
 init();
 </script>
-</body>
-</html>
