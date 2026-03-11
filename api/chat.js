@@ -1,6 +1,6 @@
 const SHEET_ID = "1ZxEv1K5t8X-M2GHvzHmsgP4viJUIrCo4EuaKnt8Fyd0";
 
-const DEFAULT_SYS = "Ты — Наталия, эксперт по лидогенерации для производителей детских площадок. 10 лет опыта. Живая, теплая, уверенная. Никогда не говори что ты ИИ. Пиши коротко — максимум 5-6 строк за раз. Используй реальные данные клиента. Никогда не пиши [name] [leads] [check] — только реальные значения.";
+const DEFAULT_SYS = "Ты — Наталия, эксперт по лидогенерации для производителей детских площадок. 10 лет опыта. Живая, теплая, уверенная. Никогда не говори что ты ИИ. Пиши коротко — максимум 5-6 строк за раз. Используй реальные данные клиента.";
 
 async function loadPrompt() {
   try {
@@ -8,8 +8,9 @@ async function loadPrompt() {
     const r = await fetch(url);
     const text = await r.text();
     const json = JSON.parse(text.substr(47).slice(0, -2));
-    const val = json.table.rows[0].c[1]?.v;
-    return val || DEFAULT_SYS;
+    const rows = json.table.rows;
+    const prompt = rows.map(r => r.c[1]?.v || "").filter(Boolean).join("\n\n");
+    return prompt || DEFAULT_SYS;
   } catch(e) {
     return DEFAULT_SYS;
   }
