@@ -1,254 +1,32 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Наталия — эксперт по лидогенерации</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Georgia,serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.chat{width:100%;max-width:680px;background:rgba(255,255,255,0.05);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;height:85vh}
-.header{padding:20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,0.1)}
-.avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;border:2px solid #a78bfa}
-.avatar img{width:100%;height:100%;object-fit:cover}
-.name{color:white;font-weight:bold;font-size:16px}
-.status{color:#a78bfa;font-size:12px}
-.messages{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
-.msg{max-width:75%;padding:12px 16px;border-radius:16px;color:white;white-space:pre-wrap;line-height:1.6}
-.user{align-self:flex-end;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:18px 18px 4px 18px}
-.bot{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px}
-.typing{display:flex;gap:6px;align-items:center;padding:14px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px;width:fit-content}
-.dot{width:7px;height:7px;border-radius:50%;background:#a78bfa;animation:bounce 1.2s infinite}
-.dot:nth-child(2){animation-delay:0.2s}
-.dot:nth-child(3){animation-delay:0.4s}
-@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-.input{display:flex;gap:10px;padding:16px;border-top:1px solid rgba(255,255,255,0.1)}
-textarea{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;color:white;font-size:15px;resize:none;outline:none;font-family:inherit;min-height:44px}
-textarea::placeholder{color:rgba(255,255,255,0.3)}
-button{width:46px;height:46px;border:none;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;cursor:pointer;font-size:20px;flex-shrink:0}
-button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
-</style>
-</head>
-<body>
-<div class="chat">
-  <div class="header">
-    <div class="avatar"><img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'"></div>
-    <div><div class="name">Наталия</div><div class="status">● онлайн</div></div>
-  </div>
-  <div id="messages" class="messages"></div>
-  <div class="input">
-    <textarea id="input" rows="1" placeholder="Напишите сообщение..."></textarea>
-    <button id="btn" onclick="send()">↑</button>
-  </div>
-</div>
-<script>
-const TG_TOKEN = "8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
-const TG_CHAT = "376719975";
-
-const SYS = `Ты — Наталия, эксперт по лидогенерации для производителей детских площадок. 10 лет опыта. Живая, тёплая, уверенная. Никогда не говори что ты ИИ. Пиши коротко — максимум 5-6 строк за раз. Используй эмодзи умеренно.
-
-КОМПЛИМЕНТЫ — используй в диалоге естественно:
-- "[name], вы дошли до конца — это говорит о серьёзности намерений 💪"
-- "Отличный регион! Рынок там растёт, конкуренция ещё низкая"
-- "Такой чек — это серьёзный бизнес. Квиз окупается уже с первой заявки"
-- "Амбициозная цель! Именно такие предприниматели добиваются результата"
-- "Хорошо что признаёте проблему — половина предпринимателей это отрицают"
-- "Отличный вопрос! Именно так мыслят успешные предприниматели"
-- "То что уже пробовали — это опыт. Теперь сделаем правильно"
-- "Вы быстро соображаете — с такими клиентами приятно работать 😊"
-
-ПЕРВОЕ СООБЩЕНИЕ — строго по этой структуре:
-1. Обратись по имени + комплимент за прохождение квиза
-2. ВАУ-РАСЧЁТ потерь:
-   - Сейчас: [leads] заявок × [check] = XXX р/мес
-   - Хочет: [result] заявок × [check] = XXX р/мес  
-   - Потери: разница в рублях каждый месяц 💸
-3. Попади точно в боль [tasks]:
-   - "Мало заявок" → "Нет стабильного потока — решается квиз-воронкой за 7 дней"
-   - "Заявки дорогие" → "Квиз отсеивает нецелевых автоматически — цена заявки падает в 2-3 раза"
-   - "Плохо закрываем" → "Дам готовый скрипт закрытия под ваш чек"
-   - "Хотим новые регионы" → "Покажу как зайти в новый регион без рисков"
-4. Конкретный план для [geo]:
-   - Шаг 1: Квиз под [clients] — 7 дней
-   - Шаг 2: РСЯ в [geo] — заявка от 150р
-   - Шаг 3: Результат через 30 дней: [result] заявок
-5. Один вопрос для начала диалога
-
-ПРАВИЛА ДИАЛОГА:
-- Всегда обращайся по имени
-- Каждые 2-3 сообщения делай комплимент
-- Задавай строго по одному вопросу за раз
-- Консультируй конкретно — цифры, сроки, шаги
-- Веди к созвону: "Хотите разберём вашу ситуацию детально за 15 минут?"
-- Никогда не говори что ты ИИ или робот
-- Максимум 5-6 строк за одно сообщение
-
-ЗАПРЕЩЕНО:
-- Длинные портянки текста
-- Общие фразы без цифр
-- Говорить "я не знаю"
-- Называть конкурентов по имени`;
-
-let history = [], loading = false, clientName = "";
-
-function add(role, text) {
-  const m = document.getElementById("messages");
-  const d = document.createElement("div");
-  d.className = "msg " + role;
-  d.innerText = text;
-  m.appendChild(d);
-  m.scrollTop = m.scrollHeight;
-}
-
-function showTyping() {
-  const m = document.getElementById("messages");
-  const d = document.createElement("div");
-  d.id = "typing";
-  d.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  m.appendChild(d);
-  m.scrollTop = m.scrollHeight;
-}
-
-function hideTyping() {
-  const t = document.getElementById("typing");
-  if (t) t.remove();
-}
-
-async function sendTG(text) {
-  try {
-    await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({chat_id: TG_CHAT, text: text})
-    });
-  } catch(e) {}
-}
-
-async function ask(msg, sys) {
-  history.push({role: "user", content: msg});
-  showTyping();
-  try {
-    const r = await fetch("https://natalia-bot.vercel.app/api/chat", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
-        max_tokens: 1500,
-        messages: [{role: "system", content: sys || SYS}, ...history]
-      })
-    });
-    const data = await r.json();
-    const reply = data.choices?.[0]?.message?.content || "Что-то пошло не так...";
-    history.push({role: "assistant", content: reply});
-    hideTyping();
-    add("bot", reply);
-    if (clientName) {
-      sendTG("💬 Диалог с " + clientName + ":\n\nКлиент: " + msg + "\n\nНаталия: " + reply);
-    }
-  } catch(e) {
-    hideTyping();
-    add("bot", "Ошибка соединения. Попробуйте ещё раз.");
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
-  loading = false;
-  document.getElementById("btn").disabled = false;
-}
-
-async function send() {
-  const input = document.getElementById("input");
-  const text = input.value.trim();
-  if (!text || loading) return;
-  loading = true;
-  document.getElementById("btn").disabled = true;
-  input.value = "";
-  add("user", text);
-  await ask(text);
-}
-
-document.getElementById("input").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-});
-
-async function init() {
-  const p = new URLSearchParams(window.location.search);
-  const id = p.get("id");
-
-  if (id) {
-    add("bot", "Привет! Меня зовут Наталия!\n\nЗагружаю ваши данные... ⏳");
-    showTyping();
-    try {
-      const r = await fetch("https://natalia-bot.vercel.app/api/quiz?id=" + id);
-      const data = await r.json();
-      hideTyping();
-
-      if (data.quiz) {
-        const q = data.quiz;
-        clientName = q.name || "";
-
-        // Расчёт потерь
-        const checkMap = {
-          "до 100 000 р": 100000,
-          "100 000 — 500 000 р": 300000,
-          "500 000 — 1 000 000 р": 750000,
-          "более 1 000 000 р": 1000000
-        };
-        const leadsMap = {
-          "0-5 (почти нет)": 3,
-          "5-20 (маловато)": 12,
-          "20-50 (неплохо)": 35,
-          "50+ (хочу больше)": 50
-        };
-        const resultMap = {
-          "20-50 заявок": 35,
-          "50-100 заявок": 75,
-          "100-200 заявок": 150,
-          "200+ заявок": 200
-        };
-
-        const checkNum = checkMap[q.check] || 300000;
-        const leadsNum = leadsMap[q.leads] || 5;
-        const resultNum = resultMap[q.result] || 50;
-        const losses = (resultNum - leadsNum) * checkNum;
-
-        const userMsg = `Клиент заполнил квиз. Данные:
-
-Имя: ${q.name || "не указано"}
-Тип клиентов: ${q.clients || "не указано"}
-Заявок сейчас: ${q.leads || "не указано"}
-Средний чек: ${q.check || "не указано"}
-Главная боль: ${q.tasks || "не указано"}
-Хочет заявок: ${q.result || "не указано"}
-Регион: ${q.geo || "не указано"}
-Телефон: ${q.phone || "не указано"}
-
-Потери в месяц: ${losses.toLocaleString("ru")} р
-
-Обратись по имени. Сделай ВАУ-расчёт потерь. Попади точно в боль. Дай конкретный план. Не проси дополнительных данных.`;
-
-        await ask(userMsg, SYS);
-      } else {
-        add("bot", "Привет! Я Наталия 👋\n\nЭксперт по лидогенерации для производителей детских площадок.\n\nЧем могу помочь?");
-      }
-    } catch(e) {
-      hideTyping();
-      add("bot", "Привет! Я Наталия 👋\n\nЧем могу помочь?");
-    }
-  } else {
-    add("bot", "Привет! Меня зовут Наталия! 👋\n\nЯ эксперт по лидогенерации для производителей детских площадок.\n\nПройдите квиз — и я подготовлю персональный план продаж для вашего бизнеса 🎯");
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
   }
-}
-
-init();
-</script>
-</body>
-</html>
-```
-
----
-
-**Что обновилось:**
-```
-✅ Новый промпт с комплиментами
-✅ Новые переменные: name, leads, check, tasks, result, geo
-✅ Расчёт потерь прямо в коде
-✅ Telegram показывает имя клиента
-✅ Первое сообщение без id — зовёт пройти квиз
+  try {
+    const body = req.body;
+    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": "https://natalia-bot.vercel.app",
+        "X-Title": "NataliaBot"
+      },
+      body: JSON.stringify(body)
+    });
+    const data = await response.json();
+    res.status(response.status).json(data);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      error: "Server error",
+      message: err.message
+    });
+  }
+}   тут перепиши полный код
