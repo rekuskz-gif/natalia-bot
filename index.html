@@ -3,139 +3,172 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Наталия — SEO эксперт 30 </title>
+<title>Наталия</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Georgia',serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
-.chat-wrapper{width:100%;max-width:680px;background:rgba(255,255,255,0.04);backdrop-filter:blur(20px);border-radius:24px;border:1px solid rgba(255,255,255,0.1);box-shadow:0 32px 80px rgba(0,0,0,0.5);display:flex;flex-direction:column;height:85vh;overflow:hidden}
-.chat-header{padding:20px 28px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:14px}
-.chat-avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid #a78bfa}
-.chat-avatar img{width:100%;height:100%;object-fit:cover}
-.chat-title{color:#fff;font-weight:bold;font-size:16px}
-.chat-status{color:#a78bfa;font-size:12px}
-.chat-messages{flex:1;overflow-y:auto;padding:24px 20px;display:flex;flex-direction:column;gap:16px}
-.message{display:flex}
-.message.user{justify-content:flex-end}
-.message.assistant{justify-content:flex-start}
-.bubble{max-width:75%;padding:12px 18px;font-size:15px;line-height:1.6;color:#fff;white-space:pre-wrap;word-break:break-word}
-.message.user .bubble{background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:18px 18px 4px 18px}
-.message.assistant .bubble{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px}
-.typing{display:flex;gap:6px;align-items:center;padding:14px 20px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px;width:fit-content}
+body{font-family:Georgia,serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.chat{width:100%;max-width:680px;background:rgba(255,255,255,0.05);border-radius:24px;overflow:hidden;display:flex;flex-direction:column;height:85vh}
+.header{padding:20px;display:flex;align-items:center;gap:14px;border-bottom:1px solid rgba(255,255,255,0.1)}
+.avatar{width:48px;height:48px;border-radius:50%;overflow:hidden;border:2px solid #a78bfa}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.name{color:white;font-weight:bold;font-size:16px}
+.status{color:#a78bfa;font-size:12px}
+.messages{flex:1;overflow:auto;padding:20px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:75%;padding:12px 16px;border-radius:16px;color:white;white-space:pre-wrap;line-height:1.6}
+.user{align-self:flex-end;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:18px 18px 4px 18px}
+.bot{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px}
+.typing{display:flex;gap:6px;align-items:center;padding:14px 16px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:18px 18px 18px 4px;width:fit-content}
 .dot{width:7px;height:7px;border-radius:50%;background:#a78bfa;animation:bounce 1.2s infinite}
 .dot:nth-child(2){animation-delay:0.2s}
 .dot:nth-child(3){animation-delay:0.4s}
 @keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
-.chat-input-area{padding:16px 20px;border-top:1px solid rgba(255,255,255,0.08);display:flex;gap:10px;align-items:flex-end}
-.chat-input-area textarea{flex:1;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:14px;padding:12px 16px;color:#fff;font-size:15px;resize:none;outline:none;font-family:inherit;line-height:1.5;min-height:48px;max-height:120px}
-.chat-input-area textarea::placeholder{color:rgba(255,255,255,0.3)}
-.send-btn{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);border:none;cursor:pointer;color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;flex-shrink:0}
-.send-btn:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
-.send-btn:not(:disabled):hover{transform:scale(1.08)}
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:rgba(167,139,250,0.3);border-radius:2px}
+.input{display:flex;gap:10px;padding:16px;border-top:1px solid rgba(255,255,255,0.1)}
+textarea{flex:1;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:10px 14px;color:white;font-size:15px;resize:none;outline:none;font-family:inherit;min-height:44px}
+textarea::placeholder{color:rgba(255,255,255,0.3)}
+button{width:46px;height:46px;border:none;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;cursor:pointer;font-size:20px;flex-shrink:0}
+button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
 </style>
 </head>
 <body>
-<div class="chat-wrapper">
-  <div class="chat-header">
-    <div class="chat-avatar">
-      <img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'">
-    </div>
-    <div>
-      <div class="chat-title">Наталия</div>
-      <div class="chat-status">● онлайн</div>
-    </div>
+<div class="chat">
+  <div class="header">
+    <div class="avatar"><img src="https://cdn-edge.kwork.ru/files/avatar/large/22/17852991-2.jpg" alt="Наталия" onerror="this.style.display='none'"></div>
+    <div><div class="name">Наталия</div><div class="status">онлайн</div></div>
   </div>
-  <div class="chat-messages" id="messages"></div>
-  <div class="chat-input-area">
-    <textarea id="input" placeholder="Напиши сообщение... (Enter для отправки)" rows="1"></textarea>
-    <button class="send-btn" id="sendBtn" onclick="sendMessage()">↑</button>
+  <div id="messages" class="messages"></div>
+  <div class="input">
+    <textarea id="input" rows="1" placeholder="Напишите сообщение..."></textarea>
+    <button id="btn" onclick="send()">↑</button>
   </div>
 </div>
-
 <script>
-const TG_TOKEN="8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
-const TG_CHAT="376719975";
-const SYS="Тебя зовут Наталия. Ты эксперт по интернет-рекламе, SEO и продвижению бизнеса. Ты работаешь в компании seokazmarket.kz. Отвечай на русском языке. Давай конкретные персональные рекомендации. Будь профессиональной но дружелюбной. В конце всегда предлагай записаться на консультацию.";
+const TG_TOKEN = "8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
+const TG_CHAT = "376719975";
 
-let history=[],loading=false,quiz=null;
+const SYS = "Ты — Наталия, эксперт по лидогенерации для производителей детских площадок. 10 лет опыта. Живая, теплая, уверенная. Никогда не говори что ты ИИ. Пиши коротко — максимум 5-6 строк за раз. Отвечай только на русском языке.\n\nКОМПЛИМЕНТЫ — используй в диалоге:\n- [name], вы дошли до конца — это говорит о серьезности\n- Отличный регион! Рынок там растет, конкуренция низкая\n- Такой чек — серьезный бизнес, квиз окупается с первой заявки\n- Амбициозная цель! Такие предприниматели добиваются результата\n- Хорошо что признаете проблему — половина отрицают\n- Отличный вопрос! Именно так мыслят успешные предприниматели\n- То что пробовали — это опыт. Теперь сделаем правильно\n- Вы быстро соображаете — с такими приятно работать\n\nПЕРВОЕ СООБЩЕНИЕ — строго по структуре:\n1. Обратись по имени + комплимент за квиз\n2. ВАУ-РАСЧЕТ: Сейчас [leads] заявок x [check] = XXX р/мес. Хотите [result] x [check] = XXX р/мес. Теряете XXX р каждый месяц\n3. Боль [tasks]: Мало заявок — квиз-воронка за 7 дней. Дорогие — квиз отсеивает нецелевых. Плохо закрываем — дам скрипт. Регионы — покажу как зайти\n4. План: 1. Квиз под [clients] 7 дней 2. РСЯ в [geo] от 150р 3. Результат через 30 дней\n5. Один вопрос для диалога\n\nПРАВИЛА:\n- Всегда по имени\n- Каждые 2-3 сообщения комплимент\n- Один вопрос за раз\n- Цифры и конкретика\n- Веди к созвону на 15 минут\n- Не проси данных — работай с тем что есть\n\nЗАПРЕЩЕНО: длинные тексты, общие фразы, я не знаю, называть конкурентов";
 
-function getParams(){
-  const p=new URLSearchParams(window.location.search);
-  const k={budget:"Бюджет",clients:"Как находят",result:"Срок",check:"Средний чек",leads:"Заявок",audience:"Аудитория",geo:"География",tasks:"Задачи",competitors:"Конкуренты",advantage:"Преимущество",services:"Услуги"};
-  let s="";
-  for(const i in k){const v=p.get(i);if(v)s+=`• ${k[i]}: ${decodeURIComponent(v)}\n`;}
-  return s;
+let history = [], loading = false, clientName = "";
+
+function add(role, text) {
+  const m = document.getElementById("messages");
+  const d = document.createElement("div");
+  d.className = "msg " + role;
+  d.innerText = text;
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
 }
 
-function addMsg(role,text){
-  const m=document.getElementById("messages");
-  const d=document.createElement("div");d.className="message "+role;
-  const b=document.createElement("div");b.className="bubble";b.textContent=text;
-  d.appendChild(b);m.appendChild(d);m.scrollTop=m.scrollHeight;
+function showTyping() {
+  const m = document.getElementById("messages");
+  const d = document.createElement("div");
+  d.id = "typing";
+  d.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  m.appendChild(d);
+  m.scrollTop = m.scrollHeight;
 }
 
-function showTyping(){
-  const m=document.getElementById("messages");
-  const d=document.createElement("div");d.className="message assistant";d.id="typing";
-  d.innerHTML='<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  m.appendChild(d);m.scrollTop=m.scrollHeight;
+function hideTyping() {
+  const t = document.getElementById("typing");
+  if (t) t.remove();
 }
 
-function hideTyping(){const t=document.getElementById("typing");if(t)t.remove();}
-
-async function tg(text){
-  try{await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:TG_CHAT,text})});}
-  catch(e){}
+async function sendTG(text) {
+  try {
+    await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({chat_id: TG_CHAT, text: text})
+    });
+  } catch(e) {}
 }
 
-async function ask(sys,msg){
-  history.push({role:"user",content:msg});
-  try{
-    const r=await fetch("/api/chat",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      body:JSON.stringify({
-        model:"openai/gpt-4o-mini",
-        max_tokens:1500,
-        messages:[{role:"system",content:sys},...history]
+async function ask(msg, sys) {
+  history.push({role: "user", content: msg});
+  showTyping();
+  try {
+    const r = await fetch("https://natalia-bot.vercel.app/api/chat", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({
+        model: "openai/gpt-4o-mini",
+        max_tokens: 1500,
+        messages: [{role: "system", content: sys || SYS}, ...history]
       })
     });
-    const data=await r.json();
-    const reply=data.choices?.[0]?.message?.content||"Что-то пошло не так...";
-    history.push({role:"assistant",content:reply});
-    hideTyping();addMsg("assistant",reply);
-    tg(`💬 Диалог:\n\n👤 ${msg}\n\n🤖 ${reply}`);
-  }catch(e){hideTyping();addMsg("assistant","Ошибка соединения 😔");console.error(e);}
-  loading=false;
-  document.getElementById("sendBtn").disabled=false;
-  document.getElementById("input").focus();
+    const data = await r.json();
+    const reply = data.choices?.[0]?.message?.content || "Что-то пошло не так...";
+    history.push({role: "assistant", content: reply});
+    hideTyping();
+    add("bot", reply);
+    sendTG("Клиент: " + (clientName || "неизвестен") + "\n\nВопрос: " + msg + "\n\nНаталия: " + reply);
+  } catch(e) {
+    hideTyping();
+    add("bot", "Ошибка соединения. Попробуйте еще раз.");
+  }
+  loading = false;
+  document.getElementById("btn").disabled = false;
 }
 
-window.sendMessage=async function(){
-  const inp=document.getElementById("input");
-  const text=inp.value.trim();
-  if(!text||loading)return;
-  loading=true;
-  document.getElementById("sendBtn").disabled=true;
-  inp.value="";addMsg("user",text);showTyping();
-  await ask(quiz?SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+quiz:SYS,text);
+async function send() {
+  const input = document.getElementById("input");
+  const text = input.value.trim();
+  if (!text || loading) return;
+  loading = true;
+  document.getElementById("btn").disabled = true;
+  input.value = "";
+  add("user", text);
+  await ask(text);
 }
 
-document.getElementById("input").addEventListener("keydown",e=>{
-  if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();sendMessage();}
+document.getElementById("input").addEventListener("keydown", function(e) {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
-const s=getParams();
-if(s){
-  quiz=s;
-  tg("📋 Новая заявка с квиза:\n\n"+s);
-  addMsg("assistant","Привет! Меня зовут Наталия 👋\n\nПолучила ваши ответы из квиза. Анализирую...");
-  showTyping();
-  setTimeout(()=>ask(SYS+"\n\nДАННЫЕ КЛИЕНТА:\n"+s,"Проанализируй ответы и дай персональные рекомендации."),800);
-}else{
-  addMsg("assistant","Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+async function init() {
+  const p = new URLSearchParams(window.location.search);
+  const id = p.get("id");
+  if (id) {
+    add("bot", "Привет! Меня зовут Наталия!\n\nЗагружаю ваши данные...");
+    showTyping();
+    try {
+      const r = await fetch("https://natalia-bot.vercel.app/api/quiz?id=" + id);
+      const data = await r.json();
+      hideTyping();
+      if (data.quiz) {
+        const q = data.quiz;
+        clientName = q.name || "";
+        const checkMap = {"до 100 000 р":100000,"100 000 — 500 000 р":300000,"500 000 — 1 000 000 р":750000,"более 1 000 000 р":1000000};
+        const leadsMap = {"0-5 (почти нет)":3,"5-20 (маловато)":12,"20-50 (неплохо)":35,"50+ (хочу больше)":50};
+        const resultMap = {"20-50 заявок":35,"50-100 заявок":75,"100-200 заявок":150,"200+ заявок":200};
+        const checkNum = checkMap[q.check] || 300000;
+        const leadsNum = leadsMap[q.leads] || 5;
+        const resultNum = resultMap[q.result] || 50;
+        const losses = (resultNum - leadsNum) * checkNum;
+        const userMsg = "Клиент заполнил квиз. Данные:\n\n" +
+          "Имя: " + (q.name || "не указано") + "\n" +
+          "Тип клиентов: " + (q.clients || "не указано") + "\n" +
+          "Заявок сейчас: " + (q.leads || "не указано") + "\n" +
+          "Средний чек: " + (q.check || "не указано") + "\n" +
+          "Главная боль: " + (q.tasks || "не указано") + "\n" +
+          "Хочет заявок: " + (q.result || "не указано") + "\n" +
+          "Регион: " + (q.geo || "не указано") + "\n" +
+          "Телефон: " + (q.phone || "не указано") + "\n" +
+          "Потери в месяц: " + losses.toLocaleString("ru") + " р\n\n" +
+          "Обратись по имени. Сделай ВАУ-расчет потерь. Попади в боль. Дай конкретный план. Не проси данных.";
+        await ask(userMsg, SYS);
+      } else {
+        add("bot", "Привет! Я Наталия.\n\nЧем могу помочь?");
+      }
+    } catch(e) {
+      hideTyping();
+      add("bot", "Привет! Я Наталия.\n\nЧем могу помочь?");
+    }
+  } else {
+    add("bot", "Привет! Меня зовут Наталия!\n\nЯ эксперт по лидогенерации для производителей детских площадок.\n\nПройдите квиз — получите персональный план продаж.");
+  }
 }
+
+init();
 </script>
 </body>
 </html>
