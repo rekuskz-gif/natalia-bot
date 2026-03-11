@@ -44,7 +44,7 @@ button:disabled{background:rgba(124,58,237,0.3);cursor:not-allowed}
 <script>
 const TG_TOKEN = "8715209750:AAH4-blEgXPZpeYXii8IeWLX0wdbGWtANQc";
 const TG_CHAT = "376719975";
-const SYS = "Тебя зовут Наталия. Ты эксперт по интернет-рекламе, SEO и продвижению бизнеса в компании seokazmarket.kz. Отвечай на русском языке. Будь профессиональной но дружелюбной. Если клиент заполнил квиз — сразу давай конкретные рекомендации на основе имеющихся данных, даже если данных мало. Бюджет в квизе — это оценка от 1 до 10 готовности вкладывать в рекламу. Не проси дополнительных данных — работай с тем что есть. В конце всегда предлагай записаться на консультацию.";
+const SYS = "Тебя зовут Наталия. Ты эксперт по интернет-рекламе, SEO и продвижению бизнеса. Ты работаешь в компании seokazmarket.kz. Отвечай на русском языке. Давай конкретные персональные рекомендации. Будь профессиональной но дружелюбной. В конце всегда предлагай записаться на консультацию.";
 
 let history = [], loading = false;
 
@@ -75,34 +75,34 @@ async function sendTG(text) {
   try {
     await fetch("https://api.telegram.org/bot" + TG_TOKEN + "/sendMessage", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({chat_id: TG_CHAT, text: text})
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: TG_CHAT, text: text })
     });
   } catch(e) {}
 }
 
 async function ask(msg, sys) {
-  history.push({role: "user", content: msg});
+  history.push({ role: "user", content: msg });
   showTyping();
   try {
     const r = await fetch("https://natalia-bot.vercel.app/api/chat", {
       method: "POST",
-      headers: {"Content-Type": "application/json"},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: "openai/gpt-4o-mini",
         max_tokens: 1500,
-        messages: [{role: "system", content: sys || SYS}, ...history]
+        messages: [{ role: "system", content: sys || SYS }, ...history]
       })
     });
     const data = await r.json();
     const reply = data.choices?.[0]?.message?.content || "Что-то пошло не так...";
-    history.push({role: "assistant", content: reply});
+    history.push({ role: "assistant", content: reply });
     hideTyping();
     add("bot", reply);
-    sendTG("💬 " + msg + "\n\n🤖 " + reply);
+    sendTG("Диалог:\n\n" + msg + "\n\nОтвет: " + reply);
   } catch(e) {
     hideTyping();
-    add("bot", "Ошибка соединения 😔");
+    add("bot", "Ошибка соединения");
   }
   loading = false;
   document.getElementById("btn").disabled = false;
@@ -120,14 +120,14 @@ async function send() {
 }
 
 document.getElementById("input").addEventListener("keydown", function(e) {
-  if (e.key === "Enter" && !e.shiftKey) {e.preventDefault(); send();}
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
 });
 
 async function init() {
   const p = new URLSearchParams(window.location.search);
   const id = p.get("id");
   if (id) {
-    add("bot", "Привет! Меня зовут Наталия 👋\n\nЗагружаю ваши данные...");
+    add("bot", "Привет! Меня зовут Наталия!\n\nЗагружаю ваши данные...");
     showTyping();
     try {
       const r = await fetch("https://natalia-bot.vercel.app/api/quiz?id=" + id);
@@ -136,32 +136,32 @@ async function init() {
       if (data.quiz) {
         const keys = {
           clients: "Как находят клиентов",
-          budget: "Готовность вкладывать в рекламу (1-10)",
-          result: "Срок",
-          check: "Средний чек",
+          budget: "Готовность вкладывать в рекламу от 1 до 10",
+          result: "Срок получения результата",
+          check: "Средний чек в тысячах",
           leads: "Заявок в месяц",
-          audience: "Аудитория",
+          audience: "Целевая аудитория",
           geo: "География",
-          tasks: "Задачи",
+          tasks: "Задачи бизнеса",
           competitors: "Конкуренты",
           advantage: "Преимущество",
-          services: "Услуги"
+          services: "Интересующие услуги"
         };
         let quizText = "";
         for (const k in keys) {
-          if (data.quiz[k]) quizText += "• " + keys[k] + ": " + data.quiz[k] + "\n";
+          if (data.quiz[k]) quizText += "- " + keys[k] + ": " + data.quiz[k] + "\n";
         }
-        const sys = SYS + "\n\nДАННЫЕ КЛИЕНТА С КВИЗА:\n" + quizText;
-        await ask("Проанализируй мои данные и сразу дай конкретную стратегию продвижения.", sys);
+        const userMsg = "Клиент заполнил квиз. Вот его данные:\n\n" + quizText + "\nПроанализируй эти данные и дай конкретную стратегию продвижения. Не проси дополнительных данных.";
+        await ask(userMsg, SYS);
       } else {
-        add("bot", "Привет! Я Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+        add("bot", "Привет! Я Наталия. Чем могу помочь?");
       }
     } catch(e) {
       hideTyping();
-      add("bot", "Привет! Я Наталия 👋\n\nЧем могу помочь?");
+      add("bot", "Привет! Я Наталия. Чем могу помочь?");
     }
   } else {
-    add("bot", "Привет! Меня зовут Наталия 👋\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
+    add("bot", "Привет! Меня зовут Наталия!\n\nЯ эксперт по рекламе и SEO в seokazmarket.kz. Чем могу помочь?");
   }
 }
 
